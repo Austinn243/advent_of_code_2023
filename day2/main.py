@@ -8,16 +8,18 @@ from collections import Counter
 from math import prod
 from os import path
 from re import compile as re_compile
-from typing import Iterable, NamedTuple
+from typing import NamedTuple
 
 INPUT_FILE = "input.txt"
 
 GAME_REGEX = re_compile(r"Game (\d+): (.*)")
-COLOR_REGEX = re_compile(r"(\d+) (red|green|blue)")
 
 Round = dict[str, int]
 
+
 class Game(NamedTuple):
+    """Represents a game that can be played with colored cubes."""
+
     id: int
     rounds: list[Round]
 
@@ -27,33 +29,8 @@ TARGET_ROUND: Round = Counter(
         "red": 12,
         "green": 13,
         "blue": 14,
-    }
+    },
 )
-
-
-def extract_counts(line: str) -> Iterable[tuple[int, str]]:
-    """Extract the counts of each color from the given line of input."""
-
-    for count, color in COLOR_REGEX.findall(line):
-        yield int(count), color
-
-
-def sum_powers_of_minimum_counts(file_path: str) -> int:
-    """Sum the powers of the minimum counts of each color required for each game."""
-
-    power_sum = 0
-
-    with open(file_path, encoding="utf-8") as file:
-        for line in file:
-            required_counts = {color: 0 for color in TARGET_ROUND}
-            for count, color in extract_counts(line):
-                required_counts[color] = max(required_counts[color], count)
-
-            power = prod(required_counts.values())
-            power_sum += power
-
-    return power_sum
-
 
 
 def read_games(file_path: str) -> list[Game]:
@@ -69,7 +46,7 @@ def parse_game(line: str) -> Game:
     game_pattern_match = GAME_REGEX.match(line)
     if not game_pattern_match:
         raise ValueError(f"Invalid game line: {line}")
-    
+
     game_id = int(game_pattern_match.group(1))
     rounds = parse_rounds(game_pattern_match.group(2))
 
@@ -94,30 +71,47 @@ def parse_rounds(segment: str) -> list[dict[str, int]]:
     return rounds
 
 
-def get_max_played_color_counts(game: Game) -> dict[str, int]:
-    """Get the maximum counts of each color played in a game."""
+def get_required_color_counts(game: Game) -> dict[str, int]:
+    """Get the required counts of each color to play all rounds of a game."""
 
-    max_color_counts = {color: 0 for color in TARGET_ROUND}
+    required_color_counts = {color: 0 for color in TARGET_ROUND}
 
-    for round in game.rounds:
-        for color, count in round.items():
-            max_color_counts[color] = max(max_color_counts[color], count)
+    for game_round in game.rounds:
+        for color, count in game_round.items():
+            required_color_counts[color] = max(required_color_counts[color], count)
 
-    return max_color_counts
+    return required_color_counts
 
 
 def can_play_round(game: Game, target_round: Round) -> bool:
     """Determine if a round could be played given information about a game."""
-    
-    max_color_counts = get_max_played_color_counts(game)
 
-    return all(max_color_counts[color] <= count for color, count in target_round.items())
+    required_color_counts = get_required_color_counts(game)
+
+    return all(
+        required_color_counts[color] <= target_count
+        for color, target_count in target_round.items()
+    )
 
 
 def sum_ids_of_games_that_can_play_round(games: list[Game], target_round: Round) -> int:
     """Sum the ids of all games that can play a given round."""
 
     return sum(game.id for game in games if can_play_round(game, target_round))
+
+
+def get_power(game: Game) -> int:
+    """Get the power of a game."""
+
+    required_counts = get_required_color_counts(game)
+
+    return prod(required_counts.values())
+
+
+def sum_powers_of_games(games: list[Game]) -> int:
+    """Sum the powers of the required counts of each color for all games."""
+
+    return sum(get_power(game) for game in games)
 
 
 def main() -> None:
@@ -128,9 +122,12 @@ def main() -> None:
     games = read_games(file_path)
 
     game_id_sum = sum_ids_of_games_that_can_play_round(games, TARGET_ROUND)
-    print(f"The sum of the IDs of games that can play the target round is {game_id_sum}")
+    print(
+        f"The sum of the IDs of games that can play the target round is {game_id_sum}",
+    )
 
-    print(sum_powers_of_minimum_counts(file_path))
+    power_sum = sum_powers_of_games(games)
+    print(f"The sum of the powers of all games is {power_sum}")
 
 
 if __name__ == "__main__":
