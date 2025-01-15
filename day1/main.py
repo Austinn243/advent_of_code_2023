@@ -25,9 +25,7 @@ DIGITS_TO_VALUES = {
 
 
 def extract_first_digit(line: str) -> int:
-    """
-    Extract the first digit from a line of input.
-    """
+    """Extract the first digit from a jumbled calibration value."""
 
     def loop(remaining: str) -> int:
         if remaining[0].isdigit():
@@ -43,9 +41,7 @@ def extract_first_digit(line: str) -> int:
 
 
 def extract_last_digit(line: str) -> int:
-    """
-    Extract the last digit from a line of input.
-    """
+    """Extract the last digit from a jumbled calibration value."""
 
     def loop(remaining: str) -> int:
         if remaining[-1].isdigit():
@@ -61,9 +57,7 @@ def extract_last_digit(line: str) -> int:
 
 
 def extract_calibration_value(line: str) -> int:
-    """
-    Retrieve the calibration value from a line of input.
-    """
+    """Retrieve the calibration value from a jumbled calibration value."""
 
     first_digit = extract_first_digit(line)
     last_digit = extract_last_digit(line)
@@ -79,15 +73,13 @@ def read_calibration_document(file_path: str) -> list[str]:
 
 
 def sum_calibration_values(calibration_values: list[str]) -> int:
-    """Sum the calibration values found in the lines of text."""
+    """Sum the calibration values found in the jumbled calibration values."""
 
     return sum(extract_calibration_value(line) for line in calibration_values)
 
 
 def main() -> None:
-    """
-    Execute the program.
-    """
+    """Execute the program."""
 
     input_file = INPUT_FILE
     file_path = path.join(path.dirname(__file__), input_file)
