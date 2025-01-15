@@ -85,13 +85,11 @@ def main() -> None:
     Execute the program.
     """
 
-    inputs = [TEST_FILE_1, TEST_FILE_2, INPUT_FILE]
+    input_file = INPUT_FILE
+    file_path = path.join(path.dirname(__file__), input_file)
 
-    for input_file in inputs:
-        file_path = path.join(path.dirname(__file__), input_file)
-
-        calibration_value_sum = sum_calibration_values_in_file(file_path)
-        print(f"{input_file}: {calibration_value_sum}")
+    calibration_value_sum = sum_calibration_values_in_file(file_path)
+    print(f"The sum of the calibration values is {calibration_value_sum}")
 
 
 if __name__ == "__main__":
