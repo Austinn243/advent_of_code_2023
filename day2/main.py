@@ -1,8 +1,7 @@
 """
 Advent of Code 2023, Day 2
-
-Determine the sum of the ids of all games which can be played with
-the specified number of colored balls.
+Cube Conundrum
+https://adventofcode.com/2023/day/2
 """
 
 from collections import Counter
@@ -27,26 +26,20 @@ TARGET_COUNTS = Counter(
 
 
 def extract_game_id(line: str) -> int:
-    """
-    Extract the id of the game from the given line of input.
-    """
+    """Extract the id of the game from the given line of input."""
 
     return int(GAME_PATTERN.match(line).group(1))
 
 
 def extract_counts(line: str) -> Iterable[tuple[int, str]]:
-    """
-    Extract the counts of each color from the given line of input.
-    """
+    """Extract the counts of each color from the given line of input."""
 
     for count, color in SET_PATTERN.findall(line):
         yield int(count), color
 
 
 def can_play_game(line: str) -> tuple[int, list[Counter]]:
-    """
-    Determine if the game specified by the given line of input can be played.
-    """
+    """Determine if the game specified by the given line of input can be played."""
 
     for count, color in extract_counts(line):
         if count > TARGET_COUNTS[color]:
@@ -56,9 +49,7 @@ def can_play_game(line: str) -> tuple[int, list[Counter]]:
 
 
 def sum_of_playable_games() -> int:
-    """
-    Determine the sum of the ids of all games which can be played.
-    """
+    """Determine the sum of the ids of all games which can be played."""
 
     game_ids = []
 
@@ -73,9 +64,7 @@ def sum_of_playable_games() -> int:
 
 
 def sum_powers_of_minimum_counts() -> int:
-    """
-    Sum the powers of the minimum counts of each color required for each game.
-    """
+    """Sum the powers of the minimum counts of each color required for each game."""
 
     power_sum = 0
 
@@ -92,10 +81,7 @@ def sum_powers_of_minimum_counts() -> int:
 
 
 def main() -> None:
-    """
-    Determine the sum of the ids of all games which can be played with
-    the specified number of colored balls.
-    """
+    """Read numbers of colored cubes from a file and process them."""
 
     print(sum_of_playable_games())
     print(sum_powers_of_minimum_counts())
