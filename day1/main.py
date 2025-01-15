@@ -71,13 +71,17 @@ def extract_calibration_value(line: str) -> int:
     return (first_digit * 10) + last_digit
 
 
-def sum_calibration_values_in_file(file_path: str) -> int:
-    """
-    Sum the calibration values in the input file.
-    """
+def read_calibration_document(file_path: str) -> list[str]:
+    """Read the jumbled calibration values from the input file."""
 
     with open(file_path, encoding="utf-8") as file:
-        return sum(extract_calibration_value(line) for line in file)
+        return file.readlines()
+
+
+def sum_calibration_values(calibration_values: list[str]) -> int:
+    """Sum the calibration values found in the lines of text."""
+
+    return sum(extract_calibration_value(line) for line in calibration_values)
 
 
 def main() -> None:
@@ -88,7 +92,9 @@ def main() -> None:
     input_file = INPUT_FILE
     file_path = path.join(path.dirname(__file__), input_file)
 
-    calibration_value_sum = sum_calibration_values_in_file(file_path)
+    jumbled_calibration_values = read_calibration_document(file_path)
+
+    calibration_value_sum = sum_calibration_values(jumbled_calibration_values)
     print(f"The sum of the calibration values is {calibration_value_sum}")
 
 
