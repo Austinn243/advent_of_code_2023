@@ -10,7 +10,6 @@ from os import path
 INPUT_FILE = "input.txt"
 TEST_FILE_1 = "test1.txt"
 TEST_FILE_2 = "test2.txt"
-PARENT_DIRECTORY = path.dirname(path.abspath(__file__))
 
 DIGITS_TO_VALUES = {
     "one": 1,
@@ -72,14 +71,12 @@ def extract_calibration_value(line: str) -> int:
     return (first_digit * 10) + last_digit
 
 
-def sum_calibration_values_in_file(filename: str) -> int:
+def sum_calibration_values_in_file(file_path: str) -> int:
     """
     Sum the calibration values in the input file.
     """
 
-    file_path = path.join(PARENT_DIRECTORY, filename)
-
-    with open(file_path, "r", encoding="utf-8") as file:
+    with open(file_path, encoding="utf-8") as file:
         return sum(extract_calibration_value(line) for line in file)
 
 
@@ -91,7 +88,9 @@ def main() -> None:
     inputs = [TEST_FILE_1, TEST_FILE_2, INPUT_FILE]
 
     for input_file in inputs:
-        calibration_value_sum = sum_calibration_values_in_file(input_file)
+        file_path = path.join(path.dirname(__file__), input_file)
+
+        calibration_value_sum = sum_calibration_values_in_file(file_path)
         print(f"{input_file}: {calibration_value_sum}")
 
 
