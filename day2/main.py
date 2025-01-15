@@ -4,7 +4,6 @@ Cube Conundrum
 https://adventofcode.com/2023/day/2
 """
 
-from collections import Counter
 from math import prod
 from os import path
 from re import compile as re_compile
@@ -24,13 +23,11 @@ class Game(NamedTuple):
     rounds: list[Round]
 
 
-TARGET_ROUND: Round = Counter(
-    {
-        "red": 12,
-        "green": 13,
-        "blue": 14,
-    },
-)
+TARGET_ROUND: Round = {
+    "red": 12,
+    "green": 13,
+    "blue": 14,
+}
 
 
 def read_games(file_path: str) -> list[Game]:
