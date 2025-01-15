@@ -11,7 +11,6 @@ from re import compile as re_compile
 from typing import Iterable
 
 INPUT_FILE = "input.txt"
-INPUT_PATH = path.join(path.dirname(__file__), INPUT_FILE)
 
 GAME_PATTERN = re_compile(r"^Game (\d+)")
 SET_PATTERN = re_compile(r"(\d+) (red|green|blue)")
@@ -48,12 +47,12 @@ def can_play_game(line: str) -> tuple[int, list[Counter]]:
     return True
 
 
-def sum_of_playable_games() -> int:
+def sum_of_playable_games(file_path: str) -> int:
     """Determine the sum of the ids of all games which can be played."""
 
     game_ids = []
 
-    with open(INPUT_PATH, encoding="utf-8") as file:
+    with open(file_path, encoding="utf-8") as file:
         for line in file:
             game_id = extract_game_id(line)
 
@@ -63,12 +62,12 @@ def sum_of_playable_games() -> int:
     return sum(game_ids)
 
 
-def sum_powers_of_minimum_counts() -> int:
+def sum_powers_of_minimum_counts(file_path: str) -> int:
     """Sum the powers of the minimum counts of each color required for each game."""
 
     power_sum = 0
 
-    with open(INPUT_PATH, encoding="utf-8") as file:
+    with open(file_path, encoding="utf-8") as file:
         for line in file:
             required_counts = {color: 0 for color in TARGET_COUNTS}
             for count, color in extract_counts(line):
@@ -83,8 +82,10 @@ def sum_powers_of_minimum_counts() -> int:
 def main() -> None:
     """Read numbers of colored cubes from a file and process them."""
 
-    print(sum_of_playable_games())
-    print(sum_powers_of_minimum_counts())
+    file_path = path.join(path.dirname(__file__), INPUT_FILE)
+
+    print(sum_of_playable_games(file_path))
+    print(sum_powers_of_minimum_counts(file_path))
 
 
 if __name__ == "__main__":
