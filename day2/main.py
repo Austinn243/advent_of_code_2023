@@ -4,14 +4,14 @@ Cube Conundrum
 https://adventofcode.com/2023/day/2
 """
 
+import re
 from math import prod
 from os import path
-from re import compile as re_compile
 from typing import NamedTuple
 
 INPUT_FILE = "input.txt"
 
-GAME_REGEX = re_compile(r"Game (\d+): (.*)")
+GAME_REGEX = re.compile(r"Game (\d+): (.*)")
 
 Round = dict[str, int]
 
@@ -40,7 +40,7 @@ def read_games(file_path: str) -> list[Game]:
 def parse_game(line: str) -> Game:
     """Parse a game from a line of text."""
 
-    game_pattern_match = GAME_REGEX.match(line)
+    game_pattern_match = re.match(GAME_REGEX, line)
     if not game_pattern_match:
         raise ValueError(f"Invalid game line: {line}")
 
