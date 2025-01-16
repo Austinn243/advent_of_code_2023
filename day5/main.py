@@ -6,6 +6,7 @@ https://adventofcode.com/2023/day/5
 
 from collections.abc import Iterable, Iterator, Sequence
 from os import path
+from typing import Optional
 
 INPUT_FILE = "input.txt"
 TEST_FILE = "test.txt"
@@ -20,29 +21,78 @@ def chunk(seq: Sequence[int], size: int) -> Iterable[Sequence[int]]:
 Mapping = tuple[range, int]
 
 
-class CategoryMap:
-    """Describes mappings within a single category of gardening components."""
+class CategoryNode:
+    """Describes a node in a our custom category mappings binary search tree."""
 
-    def __init__(self) -> None:
-        """Create a new category map with no mappings."""
+    destination_start: int
+    interval: range
+    key: int
+    left: Optional["CategoryNode"]
+    right: Optional["CategoryNode"]
 
-        self.mappings: list[Mapping] = []
+    def __init__(self, interval: range, destination_start: int) -> None:
+        """Create a new node with the given interval and destination start."""
 
-    def add_mapping(self, mapping: Mapping) -> None:
-        """Add the given mapping to the category map."""
+        self.destination_start = destination_start
+        self.interval = interval
+        self.left = None
+        self.right = None
 
-        self.mappings.append(mapping)
+        self.key = interval.start
+
+    def add_child(self, node: "CategoryNode") -> None:
+        """Add the given node as a child of this node."""
+
+        if node.key < self.key:
+            if self.left is None:
+                self.left = node
+            else:
+                self.left.add_child(node)
+        else:
+            if self.right is None:
+                self.right = node
+            else:
+                self.right.add_child(node)
 
     def map(self, number: int) -> int:
         """Map the given number from the source set to the destination set."""
 
-        for mapping in self.mappings:
-            source_range, destination_start = mapping
+        if number in self.interval:
+            return self.destination_start + number - self.interval.start
 
-            if number in source_range:
-                return destination_start + number - source_range.start
+        if number < self.key and self.left is not None:
+            return self.left.map(number)
+
+        if number > self.key and self.right is not None:
+            return self.right.map(number)
 
         return number
+
+
+class CategoryTree:
+    """Maps a set of source numbers to a set of destination numbers."""
+
+    root: Optional[CategoryNode] = None
+
+    def add_mapping(self, mapping: Mapping) -> None:
+        """Add the given mapping to the category map."""
+
+        interval, destination_start = mapping
+        node = CategoryNode(interval, destination_start)
+
+        if self.root is None:
+            self.root = node
+            return
+
+        self.root.add_child(node)
+
+    def map(self, number: int) -> int:
+        """Map the given number from the source set to the destination set."""
+
+        if not self.root:
+            return number
+
+        return self.root.map(number)
 
 
 class Almanac:
@@ -51,13 +101,13 @@ class Almanac:
     def __init__(
         self,
         seeds: list[int],
-        seed_to_soil: CategoryMap,
-        soil_to_fertilizer: CategoryMap,
-        fertilizer_to_water: CategoryMap,
-        water_to_light: CategoryMap,
-        light_to_temperature: CategoryMap,
-        temperature_to_humidity: CategoryMap,
-        humidity_to_location: CategoryMap,
+        seed_to_soil: CategoryTree,
+        soil_to_fertilizer: CategoryTree,
+        fertilizer_to_water: CategoryTree,
+        water_to_light: CategoryTree,
+        light_to_temperature: CategoryTree,
+        temperature_to_humidity: CategoryTree,
+        humidity_to_location: CategoryTree,
     ) -> None:
         """Create a new almanac with the given mappings."""
 
@@ -132,10 +182,10 @@ def extract_mapping(line: str) -> Mapping:
     return (source_range, destination_start)
 
 
-def extract_category_map(lines: Iterator[str]) -> CategoryMap:
+def extract_category_map(lines: Iterator[str]) -> CategoryTree:
     """Extract the next category map from the input file."""
 
-    category_map = CategoryMap()
+    category_map = CategoryTree()
 
     for line in lines:
         if line == "\n":
@@ -185,7 +235,6 @@ def main() -> None:
     file_path = path.join(path.dirname(__file__), input_file)
 
     almanac = read_almanac(file_path)
-    print(almanac)
 
     print(almanac.find_lowest_location_number_for_individual_seeds())
     print(almanac.find_lowest_location_number_for_seed_ranges())
