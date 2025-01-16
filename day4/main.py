@@ -78,16 +78,16 @@ def count_matches_per_card(scratchcards: list[Scratchcard]) -> dict[int, int]:
     return {card.id: count_matches(card) for card in scratchcards}
 
 
+def count_points(match_count: int) -> int:
+    """Calculate the points earned given the number of matches."""
+
+    return 2 ** (match_count - 1) if match_count > 0 else 0
+
+
 def calculate_total_points(matches_per_game: dict[int, int]) -> int:
     """Calculate the total points earned given the number of matches per card."""
 
-    total_points = 0
-
-    for match_count in matches_per_game.values():
-        points = 2 ** (match_count - 1) if match_count > 0 else 0
-        total_points += points
-
-    return total_points
+    return sum(count_points(match_count) for match_count in matches_per_game.values())
 
 
 def count_cards(matches_per_game: dict[int, int]) -> int:
