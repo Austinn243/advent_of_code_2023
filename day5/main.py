@@ -26,7 +26,7 @@ class CategoryMap:
     def __init__(self) -> None:
         """Create a new category map with no mappings."""
 
-        self.mappings = []
+        self.mappings: list[Mapping] = []
 
     def add_mapping(self, mapping: Mapping) -> None:
         """Add the given mapping to the category map."""
