@@ -9,7 +9,6 @@ from math import prod
 from os import path
 
 INPUT_FILE = "input.txt"
-INPUT_PATH = path.join(path.dirname(__file__), INPUT_FILE)
 
 
 @dataclass
@@ -48,10 +47,10 @@ class Race:
         return way_count
 
 
-def read_raw_race_data() -> tuple[list[str], list[str]]:
-    """Read the times and distances from the input file."""
+def read_raw_race_data(file_path: str) -> tuple[list[str], list[str]]:
+    """Read the times and distances from an input file."""
 
-    with open(INPUT_PATH, encoding="utf-8") as file:
+    with open(file_path, encoding="utf-8") as file:
         lines = file.readlines()
 
         times = lines[0].split()[1:]
@@ -87,7 +86,9 @@ def product_of_ways_to_win(races: list[Race]) -> int:
 def main() -> None:
     """Read race data from a file and process it."""
 
-    times, distances = read_raw_race_data()
+    file_path = path.join(path.dirname(__file__), INPUT_FILE)
+
+    times, distances = read_raw_race_data(file_path)
 
     races = interpret_data_as_multiple_races(times, distances)
     print(product_of_ways_to_win(races))
