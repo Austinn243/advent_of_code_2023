@@ -149,10 +149,8 @@ def extract_category_map(lines: Iterator[str]) -> CategoryMap:
     return category_map
 
 
-def read_almanac(filename: str) -> Almanac:
+def read_almanac(file_path: str) -> Almanac:
     """Read the almanac data from the input file."""
-
-    file_path = path.join(path.dirname(__file__), filename)
 
     with open(file_path, encoding="utf-8") as file:
         lines = iter(file.readlines())
@@ -184,8 +182,9 @@ def main() -> None:
     """Read almanac data from an input file and process it."""
 
     input_file = TEST_FILE
+    file_path = path.join(path.dirname(__file__), input_file)
 
-    almanac = read_almanac(input_file)
+    almanac = read_almanac(file_path)
     print(almanac)
 
     print(almanac.find_lowest_location_number_for_individual_seeds())
