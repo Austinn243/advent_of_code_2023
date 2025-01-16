@@ -6,10 +6,38 @@ https://adventofcode.com/2023/day/5
 
 from collections.abc import Iterable, Iterator, Sequence
 from os import path
-from typing import Optional
+from typing import NamedTuple, Optional
 
 INPUT_FILE = "input.txt"
 TEST_FILE = "test.txt"
+
+
+# CONSIDER: It seems that, if a seed lands in a given range, the destination
+# location is the seed number plus the difference between the start of the
+# source range and the start of the destination range.
+#
+# For example, with the first test example, water 81 maps to light 74. The
+# corresponding mapping has a source range with start 18, a destination range
+# with start 25. The difference between the source start and destination start
+# is equal to 18 - 25 = -7. Therefore, the destination location is 81 - 7 = 74.
+#
+# Verify this with the other examples to see if this is a general rule.
+
+# CONSIDER: While we're using an interval tree style approach to mapping the
+# categories, the actual mappings could also be represented using a graph
+# instead, where each range is a node and the edges represent the mappings
+# to ranges in other categories.
+
+# CONSIDER: Is it possible to determine the lowest location number by working
+# backwards from the location number to a seed number? Alternatively, could
+# we calculate this using some kind of formula based on the mappings?
+
+# CONSIDER: When working with a smaller set of seeds, the algorithm works
+# very quickly. However, when working with much larger sets of seeds, it
+# can't keep up, despite using what seems to be a fairly efficient approach.
+# Maybe the problem lies in how we're using the seed ranges for the second
+# example? Maybe we don't have to evaluate all the possible seeds or,
+# alternatively, we could use optimization techniques to speed up the process.
 
 
 def chunk(seq: Sequence[int], size: int) -> Iterable[Sequence[int]]:
@@ -100,7 +128,6 @@ class Almanac:
 
     def __init__(
         self,
-        seeds: list[int],
         seed_to_soil: CategoryTree,
         soil_to_fertilizer: CategoryTree,
         fertilizer_to_water: CategoryTree,
@@ -111,7 +138,6 @@ class Almanac:
     ) -> None:
         """Create a new almanac with the given mappings."""
 
-        self.seeds = seeds
         self.seed_to_soil = seed_to_soil
         self.soil_to_fertilizer = soil_to_fertilizer
         self.fertilizer_to_water = fertilizer_to_water
@@ -140,28 +166,35 @@ class Almanac:
 
         return location
 
-    def find_lowest_location_number_for_individual_seeds(self) -> int:
+    def find_lowest_location_number_for_individual_seeds(self, seeds: list[int]) -> int:
         """
         Determine the lowest location number that corresponds to
         any of the seed numbers in the almanac.
         """
 
-        return min(self.find_location_for_seed(seed) for seed in self.seeds)
+        return min(self.find_location_for_seed(seed) for seed in seeds)
 
-    def find_lowest_location_number_for_seed_ranges(self) -> int:
+    def find_lowest_location_number_for_seed_ranges(self, seeds: list[int]) -> int:
         """
         Determine the lowest location number that corresponds to
         any of the seed numbers within the pairs of seed ranges in the almanac.
         """
 
-        pairs = chunk(self.seeds, 2)
-        seed_ranges = [range(pair[0], pair[0] + pair[1]) for pair in pairs]
+        pairs = chunk(seeds, 2)
+        seed_ranges = [range(start, start + size) for start, size in pairs]
 
         return min(
             self.find_location_for_seed(seed)
             for seed_range in seed_ranges
             for seed in seed_range
         )
+
+
+class GardeningResources(NamedTuple):
+    """Represents the resources needed to plant a garden."""
+
+    seeds: list[int]
+    almanac: Almanac
 
 
 def extract_seeds(line: str) -> list[int]:
@@ -199,7 +232,7 @@ def extract_category_map(lines: Iterator[str]) -> CategoryTree:
     return category_map
 
 
-def read_almanac(file_path: str) -> Almanac:
+def read_gardening_resources(file_path: str) -> GardeningResources:
     """Read the almanac data from the input file."""
 
     with open(file_path, encoding="utf-8") as file:
@@ -216,8 +249,7 @@ def read_almanac(file_path: str) -> Almanac:
     temperature_to_humidity = extract_category_map(lines)
     humidity_to_location = extract_category_map(lines)
 
-    return Almanac(
-        seeds,
+    almanac = Almanac(
         seed_to_soil,
         soil_to_fertilizer,
         fertilizer_to_water,
@@ -227,17 +259,19 @@ def read_almanac(file_path: str) -> Almanac:
         humidity_to_location,
     )
 
+    return GardeningResources(seeds, almanac)
+
 
 def main() -> None:
     """Read almanac data from an input file and process it."""
 
-    input_file = TEST_FILE
+    input_file = INPUT_FILE
     file_path = path.join(path.dirname(__file__), input_file)
 
-    almanac = read_almanac(file_path)
+    seeds, almanac = read_gardening_resources(file_path)
 
-    print(almanac.find_lowest_location_number_for_individual_seeds())
-    print(almanac.find_lowest_location_number_for_seed_ranges())
+    print(almanac.find_lowest_location_number_for_individual_seeds(seeds))
+    print(almanac.find_lowest_location_number_for_seed_ranges(seeds))
 
 
 if __name__ == "__main__":
