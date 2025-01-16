@@ -87,10 +87,6 @@ def product_of_ways_to_win(races: list[Race]) -> int:
 def main() -> None:
     """Read race data from a file and process it."""
 
-    print(Race(7, 9).count_ways_to_win())
-    print(Race(15, 40).count_ways_to_win())
-    print(Race(30, 200).count_ways_to_win())
-
     times, distances = read_raw_race_data()
 
     races = interpret_data_as_multiple_races(times, distances)
