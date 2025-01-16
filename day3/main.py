@@ -6,8 +6,7 @@ https://adventofcode.com/2023/day/3
 
 from math import prod
 from os import path
-
-Position = tuple[int, int]
+from typing import NamedTuple
 
 INPUT_FILE = "input.txt"
 TEST_FILE = "test.txt"
@@ -25,6 +24,13 @@ PART_INDICATORS = {
     "-",
     "%",
 }
+
+
+class Position(NamedTuple):
+    """Represents a position in the schema."""
+
+    row: int
+    col: int
 
 
 class PartInformation:
@@ -68,7 +74,7 @@ def read_schema(filename: str) -> list[str]:
         return file.readlines()
 
 
-def within_bounds(schema: list[str], position: tuple[int, int]) -> bool:
+def within_bounds(schema: list[str], position: Position) -> bool:
     """Determine if the given position is within the bounds of the given file."""
 
     row, col = position
@@ -78,21 +84,21 @@ def within_bounds(schema: list[str], position: tuple[int, int]) -> bool:
 
 def get_neighbor_positions(
     schema: list[str],
-    position: tuple[int, int],
-) -> list[tuple[int, int]]:
+    position: Position,
+) -> list[Position]:
     """Get the neighbor positions of the given position."""
 
     row, col = position
 
     possible_neighbors = [
-        (row - 1, col - 1),
-        (row - 1, col),
-        (row - 1, col + 1),
-        (row, col - 1),
-        (row, col + 1),
-        (row + 1, col - 1),
-        (row + 1, col),
-        (row + 1, col + 1),
+        Position(row - 1, col - 1),
+        Position(row - 1, col),
+        Position(row - 1, col + 1),
+        Position(row, col - 1),
+        Position(row, col + 1),
+        Position(row + 1, col - 1),
+        Position(row + 1, col),
+        Position(row + 1, col + 1),
     ]
 
     return [
@@ -128,11 +134,15 @@ def extract_schema_info(schema: list[str]) -> SchemaInformation:
             if current_part_info is not None:
                 continue
 
-            for neighbor in get_neighbor_positions(schema, (row, col)):
-                n_row, n_col = neighbor
+            position = Position(row, col)
+            for neighbor_position in get_neighbor_positions(schema, position):
+                n_row, n_col = neighbor_position
                 neighbor_value = schema[n_row][n_col]
                 if neighbor_value in PART_INDICATORS:
-                    current_part_info = PartInformation(neighbor_value, (n_row, n_col))
+                    current_part_info = PartInformation(
+                        neighbor_value,
+                        neighbor_position,
+                    )
                     break
 
     return schema_info
