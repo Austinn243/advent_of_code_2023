@@ -65,10 +65,8 @@ class PartInformation:
 SchemaInformation = dict[Position, PartInformation]
 
 
-def read_schema(filename: str) -> list[str]:
+def read_schema(file_path: str) -> list[str]:
     """Read the schema from the given input file."""
-
-    file_path = path.join(path.dirname(path.abspath(__file__)), filename)
 
     with open(file_path, encoding="utf-8") as file:
         return file.readlines()
@@ -148,10 +146,13 @@ def extract_schema_info(schema: list[str]) -> SchemaInformation:
     return schema_info
 
 
-def run(filename: str) -> None:
-    """Perform operations on the given file."""
+def main() -> None:
+    """Identify the part numbers in the given input file and calculate their sum."""
 
-    schema = read_schema(filename)
+    input_file = INPUT_FILE
+    file_path = path.join(path.dirname(__file__), input_file)
+
+    schema = read_schema(file_path)
     schema_info = extract_schema_info(schema)
 
     part_number_sum = sum(sum(part_info.numbers) for part_info in schema_info.values())
@@ -159,13 +160,6 @@ def run(filename: str) -> None:
 
     gear_ratio_sum = sum(part_info.gear_ratio() for part_info in schema_info.values())
     print(gear_ratio_sum)
-
-
-def main() -> None:
-    """Identify the part numbers in the given input file and calculate their sum."""
-
-    # run(TEST_FILE)
-    run(INPUT_FILE)
 
 
 if __name__ == "__main__":
