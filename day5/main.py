@@ -1,19 +1,18 @@
 """
 Advent of Code 2023, Day 5
+If You Give A Seed A Fertilizer
+https://adventofcode.com/2023/day/5
 """
 
+from collections.abc import Iterable, Iterator, Sequence
 from os import path
-from typing import Iterator, Iterable, Sequence
-
 
 INPUT_FILE = "input.txt"
 TEST_FILE = "test.txt"
 
 
 def chunk(seq: Sequence[int], size: int) -> Iterable[Sequence[int]]:
-    """
-    Split the given sequence into chunks of the given size.
-    """
+    """Split the given sequence into chunks of the given size."""
 
     return (seq[pos : pos + size] for pos in range(0, len(seq), size))
 
@@ -22,24 +21,20 @@ Mapping = tuple[range, int]
 
 
 class CategoryMap:
-    """
-    Describes mappings within a single category of gardening components.
-    """
+    """Describes mappings within a single category of gardening components."""
 
     def __init__(self) -> None:
+        """Create a new category map with no mappings."""
+
         self.mappings = []
 
     def add_mapping(self, mapping: Mapping) -> None:
-        """
-        Add the given mapping to the category map.
-        """
+        """Add the given mapping to the category map."""
 
         self.mappings.append(mapping)
 
     def map(self, number: int) -> int:
-        """
-        Map the given number from the source set to the destination set.
-        """
+        """Map the given number from the source set to the destination set."""
 
         for mapping in self.mappings:
             source_range, destination_start = mapping
@@ -51,9 +46,7 @@ class CategoryMap:
 
 
 class Almanac:
-    """
-    Describes the mappings between the various categories of gardening components.
-    """
+    """Describes the mappings between the various categories of gardening components."""
 
     def __init__(
         self,
@@ -65,7 +58,9 @@ class Almanac:
         light_to_temperature: CategoryMap,
         temperature_to_humidity: CategoryMap,
         humidity_to_location: CategoryMap,
-    ):
+    ) -> None:
+        """Create a new almanac with the given mappings."""
+
         self.seeds = seeds
         self.seed_to_soil = seed_to_soil
         self.soil_to_fertilizer = soil_to_fertilizer
@@ -78,9 +73,7 @@ class Almanac:
         self.seed_to_location = {}
 
     def find_location_for_seed(self, seed: int) -> int:
-        """
-        Determine the location number that corresponds to the given seed number.
-        """
+        """Determine the location number that corresponds to the given seed number."""
 
         if seed in self.seed_to_location:
             return self.seed_to_location[seed]
@@ -122,9 +115,7 @@ class Almanac:
 
 
 def extract_seeds(line: str) -> list[int]:
-    """
-    Retrieve the seeds from the first line of the input file.
-    """
+    """Retrieve the seeds from the first line of the input file."""
 
     segments = iter(line.split())
     _ = next(segments)
@@ -133,9 +124,7 @@ def extract_seeds(line: str) -> list[int]:
 
 
 def extract_mapping(line: str) -> Mapping:
-    """
-    Retrieve the mapping from the given line of the input file.
-    """
+    """Retrieve the mapping from the given line of the input file."""
 
     destination_start, source_start, size = (int(segment) for segment in line.split())
     source_range = range(source_start, source_start + size)
@@ -144,9 +133,7 @@ def extract_mapping(line: str) -> Mapping:
 
 
 def extract_category_map(lines: Iterator[str]) -> CategoryMap:
-    """
-    Extract the next category map from the input file.
-    """
+    """Extract the next category map from the input file."""
 
     category_map = CategoryMap()
 
@@ -163,13 +150,11 @@ def extract_category_map(lines: Iterator[str]) -> CategoryMap:
 
 
 def read_almanac(filename: str) -> Almanac:
-    """
-    Read the almanac data from the input file.
-    """
+    """Read the almanac data from the input file."""
 
     file_path = path.join(path.dirname(__file__), filename)
 
-    with open(file_path, "r", encoding="utf-8") as file:
+    with open(file_path, encoding="utf-8") as file:
         lines = iter(file.readlines())
 
     seeds = extract_seeds(next(lines))
