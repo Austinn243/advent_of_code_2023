@@ -4,12 +4,12 @@ Scratchcards
 https://adventofcode.com/2023/day/4
 """
 
+import re
 from os import path
-from re import compile as re_compile
 
-CARD_ITEMS_PATTERN = re_compile(r"(\d+)(?!\d*:)|\|")
 INPUT_FILE = "input.txt"
-INPUT_PATH = path.join(path.dirname(__file__), INPUT_FILE)
+
+CARD_ITEMS_REGEX = re.compile(r"(\d+)(?!\d*:)|\|")
 
 
 def extract_numbers(line: str) -> tuple[set[int], set[int]]:
@@ -19,7 +19,7 @@ def extract_numbers(line: str) -> tuple[set[int], set[int]]:
     selected_numbers = set()
 
     target_set = winning_numbers
-    items = CARD_ITEMS_PATTERN.findall(line)
+    items = re.findall(CARD_ITEMS_REGEX, line)
 
     for item in items:
         if item == "":
@@ -36,12 +36,12 @@ def count_matches(winning_numbers: set[int], selected_numbers: set[int]) -> int:
     return len(winning_numbers.intersection(selected_numbers))
 
 
-def count_matches_per_game() -> dict[int, int]:
+def count_matches_per_game(file_path: str) -> dict[int, int]:
     """Count the number of matches for each game."""
 
     matches_per_game = {}
 
-    with open(INPUT_PATH, "r", encoding="utf-8") as file:
+    with open(file_path, encoding="utf-8") as file:
         for game_id, line in enumerate(file, start=1):
             winning_numbers, selected_numbers = extract_numbers(line)
             match_count = count_matches(winning_numbers, selected_numbers)
@@ -78,7 +78,9 @@ def count_cards(matches_per_game: dict[int, int]) -> int:
 def main() -> None:
     """Read scratchcard information from a file and process it."""
 
-    matches_per_game = count_matches_per_game()
+    file_path = path.join(path.dirname(__file__), INPUT_FILE)
+
+    matches_per_game = count_matches_per_game(file_path)
     print(matches_per_game)
     print(calculate_total_points(matches_per_game))
     print(count_cards(matches_per_game))
