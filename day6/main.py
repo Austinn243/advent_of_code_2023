@@ -4,27 +4,18 @@ Wait For It
 https://adventofcode.com/2023/day/6
 """
 
-from dataclasses import dataclass
 from math import prod
 from os import path
+from typing import NamedTuple
 
 INPUT_FILE = "input.txt"
 
 
-@dataclass
-class Race:
+class Race(NamedTuple):
     """Represents a single race in the competition."""
 
-    def __init__(self, time: int, distance: int) -> None:
-        """Create a new race with the given time and distance."""
-
-        self.time = time
-        self.distance = distance
-
-    def __repr__(self) -> str:
-        """Return a string representation of the Race."""
-
-        return f"Race(time: {self.time}, distance: {self.distance})"
+    time: int
+    distance: int
 
     def count_ways_to_win(self) -> int:
         """Count the number of ways to win this race."""
