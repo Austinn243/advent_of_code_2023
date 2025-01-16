@@ -10,8 +10,8 @@ from typing import NamedTuple
 
 INPUT_FILE = "input.txt"
 
-CARD_ITEMS_REGEX = re.compile(r"(\d+)(?!\d*:)|\|")
-CARD_REGEX = re.compile(r"Card\s+(\d+): (.*)")
+SCRATCHCARD_REGEX = re.compile(r"^Card\s+(\d+): (.*) \| (.*)$")
+NUMBERS_REGEX = re.compile(r"(\d+)")
 
 
 class Scratchcard(NamedTuple):
@@ -32,34 +32,21 @@ def read_scratchcards(file_path: str) -> list[Scratchcard]:
 def parse_scratchcard(line: str) -> Scratchcard:
     """Parse a scratchcard from a line of text."""
 
-    scratchcard_pattern_match = re.match(CARD_REGEX, line)
-    if not scratchcard_pattern_match:
+    pattern_match = re.match(SCRATCHCARD_REGEX, line)
+    if not pattern_match:
         raise ValueError(f"Invalid scratchcard line: {line}")
 
-    scratchcard_id = int(scratchcard_pattern_match.group(1))
-    selected_numbers, winning_numbers = parse_numbers(
-        scratchcard_pattern_match.group(2),
-    )
+    scratchcard_id = int(pattern_match.group(1))
+    selected_numbers = parse_numbers(pattern_match.group(2))
+    winning_numbers = parse_numbers(pattern_match.group(3))
 
     return Scratchcard(scratchcard_id, selected_numbers, winning_numbers)
 
 
-def parse_numbers(segment: str) -> tuple[set[int], set[int]]:
-    """Parse the winning and selected numbers from a segment of text."""
+def parse_numbers(segment: str) -> set[int]:
+    """Parse the numbers from a segment of text."""
 
-    winning_numbers = set()
-    selected_numbers = set()
-
-    target_set = winning_numbers
-    items = re.findall(CARD_ITEMS_REGEX, segment)
-
-    for item in items:
-        if item == "":
-            target_set = selected_numbers
-        else:
-            target_set.add(int(item))
-
-    return winning_numbers, selected_numbers
+    return {int(item) for item in re.findall(NUMBERS_REGEX, segment)}
 
 
 def count_matches(scratchcard: Scratchcard) -> int:
