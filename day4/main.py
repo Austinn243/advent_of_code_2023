@@ -1,7 +1,7 @@
 """
 Advent of Code 2023, Day 4
-
-Calculate the total points earned from the given cards.
+Scratchcards
+https://adventofcode.com/2023/day/4
 """
 
 from os import path
@@ -13,9 +13,7 @@ INPUT_PATH = path.join(path.dirname(__file__), INPUT_FILE)
 
 
 def extract_numbers(line: str) -> tuple[set[int], set[int]]:
-    """
-    Extract the winning numbers and selected numbers from the given line.
-    """
+    """Extract the winning numbers and selected numbers from the given line."""
 
     winning_numbers = set()
     selected_numbers = set()
@@ -33,17 +31,13 @@ def extract_numbers(line: str) -> tuple[set[int], set[int]]:
 
 
 def count_matches(winning_numbers: set[int], selected_numbers: set[int]) -> int:
-    """
-    Count the number of matching numbers between the given winning numbers and selected numbers.
-    """
+    """Count the number of matches between the winning numbers and selected numbers."""
 
     return len(winning_numbers.intersection(selected_numbers))
 
 
 def count_matches_per_game() -> dict[int, int]:
-    """
-    Count the number of matches for each game.
-    """
+    """Count the number of matches for each game."""
 
     matches_per_game = {}
 
@@ -57,9 +51,7 @@ def count_matches_per_game() -> dict[int, int]:
 
 
 def calculate_total_points(matches_per_game: dict[int, int]) -> int:
-    """
-    Calculate the total points earned from the given cards.
-    """
+    """Calculate the total points earned from the given cards."""
 
     total_points = 0
 
@@ -71,9 +63,7 @@ def calculate_total_points(matches_per_game: dict[int, int]) -> int:
 
 
 def count_cards(matches_per_game: dict[int, int]) -> int:
-    """
-    Count the total number of cards given the number of matches per card.
-    """
+    """Count the total number of cards given the number of matches per card."""
 
     card_counts = {card_id: 1 for card_id in matches_per_game}
 
@@ -86,9 +76,7 @@ def count_cards(matches_per_game: dict[int, int]) -> int:
 
 
 def main() -> None:
-    """
-    Calculate the total points earned from the given cards.
-    """
+    """Read scratchcard information from a file and process it."""
 
     matches_per_game = count_matches_per_game()
     print(matches_per_game)
