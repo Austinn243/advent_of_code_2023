@@ -195,25 +195,16 @@ def read_almanac(filename: str) -> Almanac:
     )
 
 
-def run(filename: str) -> None:
-    """
-    Run the program.
-    """
+def main() -> None:
+    """Read almanac data from an input file and process it."""
 
-    almanac = read_almanac(filename)
+    input_file = TEST_FILE
+
+    almanac = read_almanac(input_file)
     print(almanac)
 
     print(almanac.find_lowest_location_number_for_individual_seeds())
     print(almanac.find_lowest_location_number_for_seed_ranges())
-
-
-def main():
-    """
-    The main function of the program.
-    """
-
-    run(TEST_FILE)
-    # run(INPUT_FILE)
 
 
 if __name__ == "__main__":
