@@ -1,7 +1,7 @@
 """
 Advent of Code 2023, Day 3
-
-Identify the part numbers in the given input file and calculate their sum.
+Gear Ratios
+https://adventofcode.com/2023/day/3
 """
 
 from math import prod
@@ -28,33 +28,27 @@ PART_INDICATORS = {
 
 
 class PartInformation:
-    """
-    Information about a part.
-    """
+    """Information about a part."""
 
     def __init__(self, part_type: str, part_position: Position) -> None:
+        """Create a new part information object."""
+
         self.position = part_position
         self.type = part_type
         self.numbers = []
 
     def add_number(self, number: int) -> None:
-        """
-        Add the given number to the part.
-        """
+        """Add the given number to the part."""
 
         self.numbers.append(number)
 
     def is_gear(self) -> bool:
-        """
-        Determine if the part is a gear.
-        """
+        """Determine if the part is a gear."""
 
         return self.type == GEAR_INDICATOR and len(self.numbers) == 2
 
     def gear_ratio(self) -> int:
-        """
-        Calculate the gear ratio for the part.
-        """
+        """Calculate the gear ratio for the part."""
 
         if not self.is_gear():
             return 0
@@ -66,20 +60,16 @@ SchemaInformation = dict[Position, PartInformation]
 
 
 def read_schema(filename: str) -> list[str]:
-    """
-    Read the schema from the given input file.
-    """
+    """Read the schema from the given input file."""
 
     file_path = path.join(path.dirname(path.abspath(__file__)), filename)
 
-    with open(file_path, "r", encoding="utf-8") as file:
+    with open(file_path, encoding="utf-8") as file:
         return file.readlines()
 
 
 def within_bounds(schema: list[str], position: tuple[int, int]) -> bool:
-    """
-    Determine if the given position is within the bounds of the given file.
-    """
+    """Determine if the given position is within the bounds of the given file."""
 
     row, col = position
 
@@ -87,11 +77,10 @@ def within_bounds(schema: list[str], position: tuple[int, int]) -> bool:
 
 
 def get_neighbor_positions(
-    schema: list[str], position: tuple[int, int]
+    schema: list[str],
+    position: tuple[int, int],
 ) -> list[tuple[int, int]]:
-    """
-    Get the neighbor positions of the given position.
-    """
+    """Get the neighbor positions of the given position."""
 
     row, col = position
 
@@ -112,9 +101,7 @@ def get_neighbor_positions(
 
 
 def extract_schema_info(schema: list[str]) -> SchemaInformation:
-    """
-    Extract the part information from the given schema.
-    """
+    """Extract the part information from the given schema."""
 
     current_digits = []
     current_part_info = None
@@ -129,7 +116,7 @@ def extract_schema_info(schema: list[str]) -> SchemaInformation:
                         schema_info[current_part_info.position] = current_part_info
 
                     schema_info[current_part_info.position].add_number(
-                        int("".join(current_digits))
+                        int("".join(current_digits)),
                     )
 
                     current_part_info = None
@@ -152,9 +139,7 @@ def extract_schema_info(schema: list[str]) -> SchemaInformation:
 
 
 def run(filename: str) -> None:
-    """
-    Perform operations on the given file.
-    """
+    """Perform operations on the given file."""
 
     schema = read_schema(filename)
     schema_info = extract_schema_info(schema)
@@ -167,9 +152,7 @@ def run(filename: str) -> None:
 
 
 def main() -> None:
-    """
-    Identify the part numbers in the given input file and calculate their sum.
-    """
+    """Identify the part numbers in the given input file and calculate their sum."""
 
     # run(TEST_FILE)
     run(INPUT_FILE)
