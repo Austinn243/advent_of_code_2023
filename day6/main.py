@@ -1,13 +1,12 @@
 """
-Advent of Code 2023 Day 6
-
-Determine the product of the number of ways to win each race.
+Advent of Code 2023, Day 6
+Wait For It
+https://adventofcode.com/2023/day/6
 """
 
 from dataclasses import dataclass
 from math import prod
 from os import path
-
 
 INPUT_FILE = "input.txt"
 INPUT_PATH = path.join(path.dirname(__file__), INPUT_FILE)
@@ -15,21 +14,21 @@ INPUT_PATH = path.join(path.dirname(__file__), INPUT_FILE)
 
 @dataclass
 class Race:
-    """
-    Represents a single race in the competition.
-    """
+    """Represents a single race in the competition."""
 
     def __init__(self, time: int, distance: int) -> None:
+        """Create a new race with the given time and distance."""
+
         self.time = time
         self.distance = distance
 
     def __repr__(self) -> str:
+        """Return a string representation of the Race."""
+
         return f"Race(time: {self.time}, distance: {self.distance})"
 
     def count_ways_to_win(self) -> int:
-        """
-        Count the number of ways to win this race.
-        """
+        """Count the number of ways to win this race."""
 
         least_amount_of_time = 0
         most_amount_of_time = 0
@@ -50,11 +49,9 @@ class Race:
 
 
 def read_raw_race_data() -> tuple[list[str], list[str]]:
-    """
-    Read the times and distances from the input file.
-    """
+    """Read the times and distances from the input file."""
 
-    with open(INPUT_PATH, "r", encoding="utf-8") as file:
+    with open(INPUT_PATH, encoding="utf-8") as file:
         lines = file.readlines()
 
         times = lines[0].split()[1:]
@@ -64,19 +61,16 @@ def read_raw_race_data() -> tuple[list[str], list[str]]:
 
 
 def interpret_data_as_multiple_races(
-    times: list[str], distances: list[str]
+    times: list[str],
+    distances: list[str],
 ) -> list[Race]:
-    """
-    Interpret the input as a set of races.
-    """
+    """Interpret the input as a set of races."""
 
     return [Race(int(time), int(distance)) for time, distance in zip(times, distances)]
 
 
 def interpret_data_as_single_race(times: list[str], distances: list[str]) -> Race:
-    """
-    Interpret the input as a single race.
-    """
+    """Interpret the input as a single race."""
 
     time = int("".join(times))
     distance = int("".join(distances))
@@ -85,17 +79,13 @@ def interpret_data_as_single_race(times: list[str], distances: list[str]) -> Rac
 
 
 def product_of_ways_to_win(races: list[Race]) -> int:
-    """
-    Count the number of ways to win each race, then return their product.
-    """
+    """Count the number of ways to win each race, then return their product."""
 
     return prod(race.count_ways_to_win() for race in races)
 
 
-def main():
-    """
-    Evaluate race data from the input file.
-    """
+def main() -> None:
+    """Read race data from a file and process it."""
 
     print(Race(7, 9).count_ways_to_win())
     print(Race(15, 40).count_ways_to_win())
