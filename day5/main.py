@@ -166,29 +166,6 @@ class Almanac:
 
         return location
 
-    def find_lowest_location_number_for_individual_seeds(self, seeds: list[int]) -> int:
-        """
-        Determine the lowest location number that corresponds to
-        any of the seed numbers in the almanac.
-        """
-
-        return min(self.find_location_for_seed(seed) for seed in seeds)
-
-    def find_lowest_location_number_for_seed_ranges(self, seeds: list[int]) -> int:
-        """
-        Determine the lowest location number that corresponds to
-        any of the seed numbers within the pairs of seed ranges in the almanac.
-        """
-
-        pairs = chunk(seeds, 2)
-        seed_ranges = [range(start, start + size) for start, size in pairs]
-
-        return min(
-            self.find_location_for_seed(seed)
-            for seed_range in seed_ranges
-            for seed in seed_range
-        )
-
 
 class GardeningResources(NamedTuple):
     """Represents the resources needed to plant a garden."""
@@ -262,6 +239,31 @@ def read_gardening_resources(file_path: str) -> GardeningResources:
     return GardeningResources(seeds, almanac)
 
 
+def find_lowest_location_number_for_individual_seeds(
+    seeds: list[int],
+    almanac: Almanac,
+) -> int:
+    """Find the lowest location number for the given seeds."""
+
+    return min(almanac.find_location_for_seed(seed) for seed in seeds)
+
+
+def find_lowest_location_number_for_seed_ranges(
+    seeds: list[int],
+    almanac: Almanac,
+) -> int:
+    """Find the lowest location number for the seeds in the given ranges."""
+
+    pairs = chunk(seeds, 2)
+    seed_ranges = [range(start, start + size) for start, size in pairs]
+
+    return min(
+        almanac.find_location_for_seed(seed)
+        for seed_range in seed_ranges
+        for seed in seed_range
+    )
+
+
 def main() -> None:
     """Read almanac data from an input file and process it."""
 
@@ -270,8 +272,8 @@ def main() -> None:
 
     seeds, almanac = read_gardening_resources(file_path)
 
-    print(almanac.find_lowest_location_number_for_individual_seeds(seeds))
-    print(almanac.find_lowest_location_number_for_seed_ranges(seeds))
+    print(find_lowest_location_number_for_individual_seeds(seeds, almanac))
+    print(find_lowest_location_number_for_seed_ranges(seeds, almanac))
 
 
 if __name__ == "__main__":
