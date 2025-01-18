@@ -174,57 +174,22 @@ class GardeningResources(NamedTuple):
     almanac: Almanac
 
 
-def extract_seeds(line: str) -> list[int]:
-    """Retrieve the seeds from the first line of the input file."""
-
-    segments = iter(line.split())
-    _ = next(segments)
-
-    return [int(segment) for segment in segments]
-
-
-def extract_mapping(line: str) -> Mapping:
-    """Retrieve the mapping from the given line of the input file."""
-
-    destination_start, source_start, size = (int(segment) for segment in line.split())
-    source_range = range(source_start, source_start + size)
-
-    return (source_range, destination_start)
-
-
-def extract_category_map(lines: Iterator[str]) -> CategoryTree:
-    """Extract the next category map from the input file."""
-
-    category_map = CategoryTree()
-
-    for line in lines:
-        if line == "\n":
-            break
-
-        if line[0].isalpha():
-            continue
-
-        category_map.add_mapping(extract_mapping(line))
-
-    return category_map
-
-
 def read_gardening_resources(file_path: str) -> GardeningResources:
     """Read the almanac data from the input file."""
 
     with open(file_path, encoding="utf-8") as file:
         lines = iter(file.readlines())
 
-    seeds = extract_seeds(next(lines))
+    seeds = parse_seeds(next(lines))
     _ = next(lines)
     _ = next(lines)
-    seed_to_soil = extract_category_map(lines)
-    soil_to_fertilizer = extract_category_map(lines)
-    fertilizer_to_water = extract_category_map(lines)
-    water_to_light = extract_category_map(lines)
-    light_to_temperature = extract_category_map(lines)
-    temperature_to_humidity = extract_category_map(lines)
-    humidity_to_location = extract_category_map(lines)
+    seed_to_soil = parse_category(lines)
+    soil_to_fertilizer = parse_category(lines)
+    fertilizer_to_water = parse_category(lines)
+    water_to_light = parse_category(lines)
+    light_to_temperature = parse_category(lines)
+    temperature_to_humidity = parse_category(lines)
+    humidity_to_location = parse_category(lines)
 
     almanac = Almanac(
         seed_to_soil,
@@ -237,6 +202,41 @@ def read_gardening_resources(file_path: str) -> GardeningResources:
     )
 
     return GardeningResources(seeds, almanac)
+
+
+def parse_seeds(line: str) -> list[int]:
+    """Parse seed numbers from a line of text."""
+
+    segments = iter(line.split())
+    _ = next(segments)
+
+    return [int(segment) for segment in segments]
+
+
+def parse_mapping(line: str) -> Mapping:
+    """Parse a mapping from a line of text."""
+
+    destination_start, source_start, size = (int(segment) for segment in line.split())
+    source_range = range(source_start, source_start + size)
+
+    return (source_range, destination_start)
+
+
+def parse_category(lines: Iterator[str]) -> CategoryTree:
+    """Parse the next category from lines of text."""
+
+    category_map = CategoryTree()
+
+    for line in lines:
+        if line == "\n":
+            break
+
+        if line[0].isalpha():
+            continue
+
+        category_map.add_mapping(parse_mapping(line))
+
+    return category_map
 
 
 def find_lowest_location_number_for_individual_seeds(
