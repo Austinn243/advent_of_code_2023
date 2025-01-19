@@ -7,7 +7,8 @@ https://adventofcode.com/2023/day/7
 from collections import Counter
 from collections.abc import Callable
 from enum import IntEnum
-from functools import cache, cmp_to_key
+from functools import cache
+from heapq import heappop, heappush
 from os import path
 from typing import NamedTuple
 
@@ -56,26 +57,6 @@ def get_card_value(card: Card, ruleset: Ruleset) -> int:
     return ruleset.rank_values[card.rank]
 
 
-def compare_cards(
-    hand1: Hand,
-    hand2: Hand,
-    ruleset: Ruleset,
-) -> int:
-    """Compare two hands."""
-
-    hand1_type = ruleset.evaluate_hand(hand1)
-    hand2_type = ruleset.evaluate_hand(hand2)
-
-    if hand1_type != hand2_type:
-        return hand1_type - hand2_type
-
-    hand1_values = [get_card_value(card, ruleset) for card in hand1]
-    hand2_values = [get_card_value(card, ruleset) for card in hand2]
-    differences = (v1 - v2 for v1, v2 in zip(hand1_values, hand2_values))
-
-    return next((diff for diff in differences if diff != 0), 0)
-
-
 @cache
 def get_standard_hand_type(hand: Hand) -> HandType:
     """Determine the type of the hand using the standard rules."""
@@ -107,18 +88,27 @@ def get_standard_hand_type(hand: Hand) -> HandType:
 def get_wild_hand_type(hand: Hand) -> HandType:
     """Determine the type of the hand using the rules where jacks are jokers."""
 
+    def get_max_2_non_joker_counts(card_counts: Counter) -> tuple[int, int]:
+        non_joker_counts = card_counts.copy()
+        _ = non_joker_counts.pop(Card("J"), None)
+
+        if len(non_joker_counts) == 0:
+            return 0, 0
+
+        if len(non_joker_counts) == 1:
+            return next(iter(non_joker_counts.values())), 0
+
+        (_, max_count), (_, second_max_count) = non_joker_counts.most_common(2)
+        return max_count, second_max_count
+
     card_counts = Counter(hand)
 
-    # FIXME: This implementation provides the wrong values, likely when it
-    # comes down to hands involving different ranks.
-
     joker_count = card_counts.get(Card("J"), 0)
-    max_non_joker_count = max(
-        (card_counts[card] for card in card_counts if card != Card("J")),
-        default=0,
+    largest_non_joker_count, second_largest_non_joker_count = (
+        get_max_2_non_joker_counts(card_counts)
     )
 
-    largest_same_rank_count = max_non_joker_count + joker_count
+    largest_same_rank_count = largest_non_joker_count + joker_count
 
     if largest_same_rank_count == 5:
         return HandType.FIVE_OF_A_KIND
@@ -126,14 +116,20 @@ def get_wild_hand_type(hand: Hand) -> HandType:
     if largest_same_rank_count == 4:
         return HandType.FOUR_OF_A_KIND
 
-    can_make_full_house = largest_same_rank_count >= 3 and len(card_counts) >= 2
-    if can_make_full_house:
+    jokers_needed_for_full_house = (3 - largest_non_joker_count) + (
+        2 - second_largest_non_joker_count
+    )
+    if jokers_needed_for_full_house <= joker_count:
         return HandType.FULL_HOUSE
 
     if largest_same_rank_count == 3:
         return HandType.THREE_OF_A_KIND
 
-    if len(card_counts) == 3:
+    jokers_needed_for_two_pair = (2 - largest_non_joker_count) + (
+        2 - second_largest_non_joker_count
+    )
+
+    if jokers_needed_for_two_pair <= joker_count:
         return HandType.TWO_PAIR
 
     if largest_same_rank_count == 2:
@@ -205,13 +201,22 @@ def total_winnings(
 ) -> int:
     """Calculate the total winnings from the given hands and bids."""
 
-    key = cmp_to_key(
-        lambda play1, play2: compare_cards(play1.hand, play2.hand, ruleset),
-    )
+    ordered_plays = []
 
-    sorted_by_rank = sorted(plays, key=key)
+    for play in plays:
+        hand_type = ruleset.evaluate_hand(play.hand)
+        card_values = tuple(get_card_value(card, ruleset) for card in play.hand)
 
-    return sum(play.bid * rank for rank, play in enumerate(sorted_by_rank, start=1))
+        heappush(ordered_plays, (hand_type, card_values, play))
+
+    rank = 1
+    total_winnings = 0
+    while ordered_plays:
+        _, _, play = heappop(ordered_plays)
+        total_winnings += play.bid * rank
+        rank += 1
+
+    return total_winnings
 
 
 def main() -> None:
@@ -234,9 +239,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
-# 250433274 is too low
-# 250637576 is wrong
-# 250740442 is wrong
-# 251363551 is incorrect
