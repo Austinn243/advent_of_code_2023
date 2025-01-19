@@ -5,20 +5,23 @@ https://adventofcode.com/2023/day/7
 """
 
 from collections import Counter
+from collections.abc import Callable
 from enum import IntEnum
+from functools import cache, cmp_to_key
 from os import path
+from typing import NamedTuple
 
 INPUT_FILE = "input.txt"
+TEST_FILE = "test.txt"
 
-
-RANKS = {
+STANDARD_RANKS = {
     "2": 2,
     "3": 3,
     "4": 4,
     "5": 5,
-    "6": 7,
+    "6": 6,
     "7": 7,
-    "8": 9,
+    "8": 8,
     "9": 9,
     "T": 10,
     "J": 11,
@@ -26,6 +29,18 @@ RANKS = {
     "K": 13,
     "A": 14,
 }
+
+
+class Card(NamedTuple):
+    """Represents a card in Camel Cards."""
+
+    rank: str
+
+
+def get_card_value(card: Card, ranks: dict[str, int]) -> int:
+    """Return the value of the given card."""
+
+    return ranks[card.rank]
 
 
 class HandType(IntEnum):
@@ -40,52 +55,39 @@ class HandType(IntEnum):
     FIVE_OF_A_KIND = 6
 
 
-class Hand:
-    """Represents a hand in Camel Cards."""
-
-    def __init__(self, cards: list[str]) -> None:
-        """Create a new hand with the given cards."""
-
-        self.cards = cards
-
-    def __repr__(self) -> str:
-        """Return a string representation of this hand."""
-
-        return f"Hand({self.cards})"
-
-    def __gt__(self, other: "Hand") -> bool:
-        """Determine if this hand beats the other hand."""
-
-        self_hand_type = get_hand_type(self)
-        other_hand_type = get_hand_type(other)
-
-        if self_hand_type != other_hand_type:
-            return self_hand_type > other_hand_type
-
-        for card, other_card in zip(self.cards, other.cards):
-            if RANKS[card] != RANKS[other_card]:
-                return RANKS[card] > RANKS[other_card]
-
-        return False
+Hand = tuple[Card, Card, Card, Card, Card]
 
 
-def read_game_information(file_path: str) -> list[tuple[Hand, int]]:
-    """Read the hands and bids from the input file."""
+class Play(NamedTuple):
+    """Represents a play in Camel Cards."""
 
-    data = []
-
-    with open(file_path, encoding="utf-8") as file:
-        for line in file:
-            cards, bid = line.split()
-            data.append((Hand(cards), int(bid)))
-
-    return data
+    hand: Hand
+    bid: int
 
 
-def get_hand_type(hand: Hand) -> HandType:
-    """Determine the type of the hand with the given cards."""
+def read_plays(file_path: str) -> list[Play]:
+    """Read the plays for a game of Camel Cards from the input file."""
 
-    card_counts = Counter(hand.cards)
+    with open(file_path) as file:
+        return [parse_play(line) for line in file]
+
+
+def parse_play(line: str) -> Play:
+    """Parse a play from the given line."""
+
+    raw_cards, raw_bid = line.strip().split(" ")
+
+    hand = tuple(Card(raw_card) for raw_card in raw_cards)
+    bid = int(raw_bid)
+
+    return Play(hand, bid)
+
+
+@cache
+def get_standard_hand_type(hand: Hand) -> HandType:
+    """Determine the type of the hand with the given cards under standard rules."""
+
+    card_counts = Counter(hand)
 
     if len(card_counts) == 1:
         return HandType.FIVE_OF_A_KIND
@@ -108,29 +110,53 @@ def get_hand_type(hand: Hand) -> HandType:
     return HandType.HIGH_CARD
 
 
-def total_winnings(hands_and_bids: list[tuple[str, int]]) -> int:
+@cache
+def compare_cards(
+    hand1: Hand,
+    hand2: Hand,
+    get_hand_type: Callable[[Hand], HandType],
+) -> int:
+    """Compare two hands."""
+
+    hand1_type = get_hand_type(hand1)
+    hand2_type = get_hand_type(hand2)
+
+    if hand1_type != hand2_type:
+        return hand1_type - hand2_type
+
+    hand1_values = [get_card_value(card, STANDARD_RANKS) for card in hand1]
+    hand2_values = [get_card_value(card, STANDARD_RANKS) for card in hand2]
+    differences = (v1 - v2 for v1, v2 in zip(hand1_values, hand2_values))
+
+    return next((diff for diff in differences if diff != 0), 0)
+
+
+def total_winnings(
+    plays: list[Play],
+    get_hand_type: Callable[[Hand], HandType],
+) -> int:
     """Calculate the total winnings from the given hands and bids."""
 
-    sorted_by_rank = sorted(hands_and_bids, key=lambda x: x[0], reverse=True)
+    key = cmp_to_key(
+        lambda play1, play2: compare_cards(play1.hand, play2.hand, get_hand_type),
+    )
 
-    return sum(bid * rank for rank, (_, bid) in enumerate(sorted_by_rank, start=1))
+    sorted_by_rank = sorted(plays, key=key)
+
+    return sum(play.bid * rank for rank, play in enumerate(sorted_by_rank, start=1))
 
 
 def main() -> None:
     """Read Camel Card hands and their bids from the input file and evaluate them."""
 
-    file_path = path.join(path.dirname(__file__), INPUT_FILE)
+    input_file = INPUT_FILE
+    file_path = path.join(path.dirname(__file__), input_file)
 
-    hands_and_bids = read_game_information(file_path)
-    for hand, _ in hands_and_bids:
-        print(f"{hand} is a {get_hand_type(hand).name}")
+    plays = read_plays(file_path)
 
-    print(total_winnings(hands_and_bids))
+    total_winnings_with_standard_rules = total_winnings(plays, get_standard_hand_type)
+    print("Total Winnings with Standard Rules: ", total_winnings_with_standard_rules)
 
 
 if __name__ == "__main__":
     main()
-
-
-# INCORRECT: 249952973
-# TOO HIGH: 251048314
