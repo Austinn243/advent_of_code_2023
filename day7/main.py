@@ -1,13 +1,12 @@
 """
-Advent of Code 2023 Day 7
-
-Evaluate hands in Camel Cards.
+Advent of Code 2023, Day 7
+Camel Cards
+https://adventofcode.com/2023/day/7
 """
 
 from collections import Counter
 from enum import IntEnum
 from os import path
-
 
 INPUT_FILE = "input.txt"
 INPUT_PATH = path.join(path.dirname(__file__), INPUT_FILE)
@@ -31,9 +30,7 @@ RANKS = {
 
 
 class HandType(IntEnum):
-    """
-    Represents a type of hand in Camel Cards.
-    """
+    """Represents a type of hand in Camel Cards."""
 
     HIGH_CARD = 0
     ONE_PAIR = 1
@@ -45,18 +42,22 @@ class HandType(IntEnum):
 
 
 class Hand:
-    """
-    Represents a hand in Camel Cards.
-    """
+    """Represents a hand in Camel Cards."""
 
     def __init__(self, cards: list[str]) -> None:
+        """Create a new hand with the given cards."""
+
         self.cards = cards
         self.type = None
 
     def __repr__(self) -> str:
+        """Return a string representation of this hand."""
+
         return f"Hand({self.cards})"
 
     def __gt__(self, other: "Hand") -> bool:
+        """Determine if this hand beats the other hand."""
+
         if self.hand_type() != other.hand_type():
             return self.hand_type() > other.hand_type()
 
@@ -67,9 +68,7 @@ class Hand:
         return False
 
     def hand_type(self) -> HandType:
-        """
-        Determine the type of this hand.
-        """
+        """Determine the type of this hand."""
 
         if self.type is not None:
             return self.type
@@ -101,13 +100,11 @@ class Hand:
 
 
 def read_data() -> list[tuple[Hand, int]]:
-    """
-    Read the hands and bids from the input file.
-    """
+    """Read the hands and bids from the input file."""
 
     data = []
 
-    with open(INPUT_PATH, "r", encoding="utf-8") as file:
+    with open(INPUT_PATH, encoding="utf-8") as file:
         for line in file:
             cards, bid = line.split()
             data.append((Hand(cards), int(bid)))
@@ -116,9 +113,7 @@ def read_data() -> list[tuple[Hand, int]]:
 
 
 def total_winnings(hands_and_bids: list[tuple[str, int]]) -> int:
-    """
-    Calculate the total winnings from the given hands and bids.
-    """
+    """Calculate the total winnings from the given hands and bids."""
 
     sorted_by_rank = sorted(hands_and_bids, key=lambda x: x[0], reverse=True)
 
@@ -126,9 +121,7 @@ def total_winnings(hands_and_bids: list[tuple[str, int]]) -> int:
 
 
 def main() -> None:
-    """
-    Read Camel Card hands and their bids from the input file and evaluate them.
-    """
+    """Read Camel Card hands and their bids from the input file and evaluate them."""
 
     hands_and_bids = read_data()
     for hand, _ in hands_and_bids:
