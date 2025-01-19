@@ -47,7 +47,6 @@ class Hand:
         """Create a new hand with the given cards."""
 
         self.cards = cards
-        self.type = None
 
     def __repr__(self) -> str:
         """Return a string representation of this hand."""
@@ -57,45 +56,17 @@ class Hand:
     def __gt__(self, other: "Hand") -> bool:
         """Determine if this hand beats the other hand."""
 
-        if self.hand_type() != other.hand_type():
-            return self.hand_type() > other.hand_type()
+        self_hand_type = get_hand_type(self)
+        other_hand_type = get_hand_type(other)
+
+        if self_hand_type != other_hand_type:
+            return self_hand_type > other_hand_type
 
         for card, other_card in zip(self.cards, other.cards):
             if RANKS[card] != RANKS[other_card]:
                 return RANKS[card] > RANKS[other_card]
 
         return False
-
-    def hand_type(self) -> HandType:
-        """Determine the type of this hand."""
-
-        if self.type is not None:
-            return self.type
-
-        card_counts = Counter(self.cards)
-
-        if len(card_counts) == 1:
-            self.type = HandType.FIVE_OF_A_KIND
-
-        elif len(card_counts) == 2:
-            if 4 in card_counts.values():
-                self.type = HandType.FOUR_OF_A_KIND
-            else:
-                self.type = HandType.FULL_HOUSE
-
-        elif len(card_counts) == 3:
-            if 3 in card_counts.values():
-                self.type = HandType.THREE_OF_A_KIND
-            else:
-                self.type = HandType.TWO_PAIR
-
-        elif len(card_counts) == 4:
-            self.type = HandType.ONE_PAIR
-
-        else:
-            self.type = HandType.HIGH_CARD
-
-        return self.type
 
 
 def read_game_information(file_path: str) -> list[tuple[Hand, int]]:
@@ -109,6 +80,32 @@ def read_game_information(file_path: str) -> list[tuple[Hand, int]]:
             data.append((Hand(cards), int(bid)))
 
     return data
+
+
+def get_hand_type(hand: Hand) -> HandType:
+    """Determine the type of the hand with the given cards."""
+
+    card_counts = Counter(hand.cards)
+
+    if len(card_counts) == 1:
+        return HandType.FIVE_OF_A_KIND
+
+    if len(card_counts) == 2:
+        if 4 in card_counts.values():
+            return HandType.FOUR_OF_A_KIND
+        else:
+            return HandType.FULL_HOUSE
+
+    if len(card_counts) == 3:
+        if 3 in card_counts.values():
+            return HandType.THREE_OF_A_KIND
+        else:
+            return HandType.TWO_PAIR
+
+    if len(card_counts) == 4:
+        return HandType.ONE_PAIR
+
+    return HandType.HIGH_CARD
 
 
 def total_winnings(hands_and_bids: list[tuple[str, int]]) -> int:
@@ -126,7 +123,7 @@ def main() -> None:
 
     hands_and_bids = read_game_information(file_path)
     for hand, _ in hands_and_bids:
-        print(f"{hand} is a {hand.hand_type().name}")
+        print(f"{hand} is a {get_hand_type(hand).name}")
 
     print(total_winnings(hands_and_bids))
 
