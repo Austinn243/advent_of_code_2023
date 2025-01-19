@@ -9,7 +9,6 @@ from enum import IntEnum
 from os import path
 
 INPUT_FILE = "input.txt"
-INPUT_PATH = path.join(path.dirname(__file__), INPUT_FILE)
 
 
 RANKS = {
@@ -99,12 +98,12 @@ class Hand:
         return self.type
 
 
-def read_data() -> list[tuple[Hand, int]]:
+def read_game_information(file_path: str) -> list[tuple[Hand, int]]:
     """Read the hands and bids from the input file."""
 
     data = []
 
-    with open(INPUT_PATH, encoding="utf-8") as file:
+    with open(file_path, encoding="utf-8") as file:
         for line in file:
             cards, bid = line.split()
             data.append((Hand(cards), int(bid)))
@@ -123,7 +122,9 @@ def total_winnings(hands_and_bids: list[tuple[str, int]]) -> int:
 def main() -> None:
     """Read Camel Card hands and their bids from the input file and evaluate them."""
 
-    hands_and_bids = read_data()
+    file_path = path.join(path.dirname(__file__), INPUT_FILE)
+
+    hands_and_bids = read_game_information(file_path)
     for hand, _ in hands_and_bids:
         print(f"{hand} is a {hand.hand_type().name}")
 
